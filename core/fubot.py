@@ -1,6 +1,8 @@
 from twisted.internet import protocol, reactor, ssl
+from twisted.python import log
 
 from core.factory import FuNetwork
+from core.pluginmanager import plugin_manager
 
 class Fubot(object):
     def __init__(self, reactor, conf_filename, conf_json):
@@ -14,3 +16,9 @@ class Fubot(object):
             nw = FuNetwork(self.reactor, self, nwconfig)
             self.connections[nw.name] = nw
             nw.connect()
+
+    def handle_privmsg(self, proto, user, channel, message):
+        log.msg("handle_privmsg: %s %s %s" % (user, channel, message))
+        plugins = plugin_manager.filter()
+        for plugin in plugins:
+            plugin.handle(proto, user, channel, message)

@@ -35,3 +35,4 @@ class FuProtocol(object, irc.IRCClient):
 
     def privmsg(self, user, channel, message):
         log.msg("%s: %s | %s" % (user, channel, message))
+        self.bot.handle_privmsg(self, user, channel, message)
