@@ -1,0 +1,19 @@
+{
+    "logfile": "stdout",
+    "networks": [
+        {
+            "name": "localhost",
+            "hostname": "localhost",
+            "port": "6667",
+            "ssl": "False",
+            "channels": [
+                {
+                    "name": "#test"
+                },
+                {
+                    "name": "#bots"
+                }
+            ]
+        }
+    ]
+}
