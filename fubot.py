@@ -8,11 +8,24 @@ from core.protocol import FuProtocol
 from core.fubot import Fubot
 
 import json
+import argparse
 
-def main():
-    SETTINGS = 'settings.json'
+DEFAULT_SETTINGS = 'settings.json'
 
-    with open(SETTINGS) as fd:
+parser = argparse.ArgumentParser(prog='Fubot')
+
+parser.add_argument('-c', '--config', dest='conffile',
+                    help='The configuration file to use',
+                    metavar='config_file',
+                    action='store', default=DEFAULT_SETTINGS)
+
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+
+    conffile = args.conffile
+
+    with open(conffile) as fd:
         config = json.load(fd)
 
     name = config.get('logfile', None)
@@ -24,9 +37,6 @@ def main():
         else:
             log.startLogging(open(name, 'r'))
 
-    fubot = Fubot(reactor, SETTINGS, config)
+    fubot = Fubot(reactor, conffile, config)
     reactor.callWhenRunning(fubot.start)
     reactor.run()
-
-if __name__ == '__main__':
-    main()
