@@ -24,10 +24,14 @@ class FuProtocol(object, irc.IRCClient):
         self.network = network
 
     def signedOn(self):
-        self.join('#test')
+        channels = self.network.config.get('channels', ())
+
         if 'nickserv' in self.network.config:
             log.msg('Nickserv setting found')
             self.msg('nickserv', 'IDENTIFY %s' % self.network.config['nickserv'].encode('ascii'))
+
+        for chan in channels:
+            self.join(chan['name'].encode('ascii'))
 
     def joined(self, channel):
         self.msg(channel, 'hello world')
