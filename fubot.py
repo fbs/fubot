@@ -15,7 +15,7 @@ class FuProtocol(object, irc.IRCClient):
     # CTCP
     versionName = 'fubot'
     versionNum = '0.1'
-    versionEnv = 'loo nix'
+    versionEnv = 'loonix'
     sourceURL = '127.0.0.1'
 
     def __init__(self, reactor, bot, network):
