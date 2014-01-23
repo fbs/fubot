@@ -29,7 +29,7 @@ class Fubot(object):
         plugin_data = self.config.get('plugin-data', '')
         for plugin in plugins:
             data = plugin_data[plugin.name]
-            log.msg('plugin data: %s' % data)
+            # log.msg('plugin data: %s' % data)
             plugin.initialize(data)
 
         # Connect to the networks
@@ -42,7 +42,7 @@ class Fubot(object):
             nw.connect()
 
     def handle_privmsg(self, proto, user, channel, message):
-        log.msg("handle_privmsg: %s %s %s" % (user, channel, message))
+        # log.msg("handle_privmsg: %s %s %s" % (user, channel, message))
         user = _split_user(user)
 
         plugins = plugin_manager.filter(interface=IRawMsgHandler)
@@ -62,8 +62,8 @@ class Fubot(object):
                 log.msg("Invalid command")
                 return
 
-            log.msg("Command: %s" % cmd)
+            # log.msg("Command: %s" % cmd)
             plugins = plugin_manager.filter(interface=IMsgHandler, command=cmd)
             for plugin in plugins:
-                log.msg("Plugin found: %s" % plugin.name)
+                # log.msg("Plugin found: %s" % plugin.name)
                 plugin.handle(proto, user, channel, args)
