@@ -27,12 +27,11 @@ class FuProtocol(object, irc.IRCClient):
         for chan in channels:
             self.join(chan['name'].encode('ascii'))
 
-    def joined(self, channel):
-        self.msg(channel, 'hello world')
+    # def joined(self, channel):
+    #     self.msg(channel, 'hello world')
 
     def connectionLost(self, reason):
         pass
 
     def privmsg(self, user, channel, message):
-        log.msg("%s: %s | %s" % (user, channel, message))
         self.bot.handle_privmsg(self, user, channel, message)
