@@ -12,6 +12,11 @@ class Fubot(object):
         self.config = conf_json
 
     def start(self):
+        plugins = self.config.get('plugins', [])
+        plugin_manager.load(plugins)
+        self._connect()
+
+    def _connect(self):
         for nwconfig in self.config['networks']:
             nw = FuNetwork(self.reactor, self, nwconfig)
             self.connections[nw.name] = nw
