@@ -16,7 +16,7 @@ class PluginManager(object):
         for plugin in plugins:
             __import__(plugin['name'])
 
-    def register(self, plugin, command=''):
+    def register(self, plugin):
         if IPlugin.providedBy(plugin):
             self.plugins.append(plugin)
         log.msg("Registered plugin: %s, version %s, by %s" %
