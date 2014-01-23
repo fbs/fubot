@@ -5,6 +5,12 @@ from core.factory import FuNetwork
 from core.pluginmanager import plugin_manager
 from core.interface import *
 
+def _split_user(user):
+    """Split nick!name@host into [nick, name, host]"""
+    u, _ = user.split("!")
+    r, h = _.split("@")
+    return [u, r, h]
+
 class Fubot(object):
     def __init__(self, reactor, conf_filename, conf_json):
         self.reactor = reactor
@@ -37,6 +43,7 @@ class Fubot(object):
 
     def handle_privmsg(self, proto, user, channel, message):
         log.msg("handle_privmsg: %s %s %s" % (user, channel, message))
+        user = _split_user(user)
 
         plugins = plugin_manager.filter(interface=IRawMsgHandler)
         for plugin in plugins:
