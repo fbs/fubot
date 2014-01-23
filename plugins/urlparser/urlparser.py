@@ -8,6 +8,9 @@ from core.pluginmanager import plugin_manager
 class URLParser(object):
     implements(IMsgHandler)
 
+    name = 'plugin.url_parser'
+    version = '0.1'
+
     regex_url = re.compile(r'\bhttps?://\S+')
     regex_title = re.compile(r'<title>(.*?)</title>', flags=re.IGNORECASE)
 

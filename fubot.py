@@ -37,7 +37,7 @@ if __name__ == '__main__':
         else:
             log.startLogging(open(name, 'r'))
 
-    __import__('plugins.urlparser')
+    __import__('plugins.urlparser.urlparser')
 
     fubot = Fubot(reactor, conffile, config)
     reactor.callWhenRunning(fubot.start)
