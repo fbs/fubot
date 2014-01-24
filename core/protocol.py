@@ -4,7 +4,7 @@ from twisted.python import log
 class FuProtocol(object, irc.IRCClient):
     nickname = 'fubot'
 
-    lineRate = 0.3
+    lineRate = 1
 
     # CTCP
     versionName = 'fubot'
@@ -35,3 +35,8 @@ class FuProtocol(object, irc.IRCClient):
 
     def privmsg(self, user, channel, message):
         self.bot.handle_privmsg(self, user, channel, message)
+
+    def msg(self, user, message, length=None):
+        if len(message) > 400:
+            message = message[0:400] + '... truncated'
+        irc.IRCClient.msg(self, user, message, length)
