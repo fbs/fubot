@@ -43,6 +43,8 @@ class Fubot(object):
 
     def handle_privmsg(self, proto, user, channel, message):
         # log.msg("handle_privmsg: %s %s %s" % (user, channel, message))
+        cmd = ''
+        args = ''
         user = _split_user(user)
 
         plugins = plugin_manager.filter(interface=IRawMsgHandler)
@@ -53,17 +55,26 @@ class Fubot(object):
         # "  @ command arg1" -> ['@', 'arg1']
         msglst = [w for w in message.split(' ') if w]
 
-        if msglst[0][0] == self.cmdprefix:
+        # Private messages dont have to start with the command prefix
+        if channel == proto.nickname:
+            channel = user[0]
+            if msglst[0][0] == self.cmdprefix:
+                cmd = msglst[0][1:]
+            else:
+                cmd = msglst[0]
+            args = msglst[1:]
+
+        # Channel messages do
+        elif msglst[0][0] == self.cmdprefix:
             cmd = msglst[0][1:]
             args = msglst[1:]
 
-            # Nothing after the @, so no command
-            if not cmd:
-                log.msg("Invalid command")
-                return
+        # Skip invalid commands
+        else:
+            return
 
-            # log.msg("Command: %s" % cmd)
-            plugins = plugin_manager.filter(interface=IMsgHandler, command=cmd)
-            for plugin in plugins:
-                # log.msg("Plugin found: %s" % plugin.name)
-                plugin.handle(proto, user, channel, args)
+        # log.msg("Command: %s" % cmd)
+        plugins = plugin_manager.filter(interface=IMsgHandler, command=cmd)
+        for plugin in plugins:
+            # log.msg("Plugin found: %s" % plugin.name)
+            plugin.handle(proto, user, channel, args)
