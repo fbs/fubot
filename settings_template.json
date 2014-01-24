@@ -1,4 +1,5 @@
 {
+    "command-prefix": "@",
     "logfile": "stdout",
     "networks": [
         {
@@ -15,5 +16,11 @@
                 }
             ]
         }
+    ],
+    "plugins": [
+        { "name": "plugins.ping.ping" },
+        { "name": "plugins.hash.hash" },
+        { "name": "plugins.urbandict.urbandict" },
+        { "name": "plugins.titlefetcher.titlefetcher" }
     ]
 }
