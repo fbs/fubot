@@ -22,7 +22,8 @@ class Fubot(object):
     def start(self):
         # Get plugins from config file and load them
         plugins = self.config.get('plugins', [])
-        plugin_manager.load(plugins)
+        for p in plugins:
+            plugin_manager.load(p.get('name', ''))
 
         # Find all plugins that need to be initialized
         plugins = plugin_manager.filter(interface = IInitialize)
