@@ -34,6 +34,9 @@ def _try_import(name):
 
 class PluginManager(object):
     """PluginManger singleton class"""
+
+    stopped = False
+
     def __init__(self):
         self.plugins = []
 
@@ -49,7 +52,7 @@ class PluginManager(object):
             plugin.finalize()
 
     def _is_loaded(self, name):
-        """Return True if a plugin with name `name` is loaded, 
+        """Return True if a plugin with name `name` is loaded,
         False otherwise"""
         if self._findname(name):
             return True
@@ -105,6 +108,9 @@ class PluginManager(object):
 
     def stop(self):
         """Stop the pluginmanager, finalize and remove all plugins"""
+        if self.stopped:
+            return
+        self.stopped = True
         log.msg('Stopping the plugin manager')
         for plugin in self.plugins:
             self._finalize(plugin)

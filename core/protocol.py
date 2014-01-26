@@ -22,16 +22,20 @@ class FuProtocol(object, irc.IRCClient):
 
         if 'nickserv' in self.network.config:
             log.msg('Nickserv setting found')
-            self.msg('nickserv', 'IDENTIFY %s' % self.network.config['nickserv'].encode('ascii'))
+            self.msg('nickserv', 'IDENTIFY %s' %
+                     self.network.config['nickserv'].encode('ascii'))
 
         for chan in channels:
             self.join(chan['name'].encode('ascii'))
 
-    # def joined(self, channel):
-    #     self.msg(channel, 'hello world')
+    def connectionMade(self):
+        self.network.connection = self
+        irc.IRCClient.connectionMade(self)
 
     def connectionLost(self, reason):
-        pass
+        log.msg('Lost connection to [%s]: %s' % (self.network.name, reason))
+        self.network.connection = None
+        irc.IRCClient.connectionLost(self, reason)
 
     def privmsg(self, user, channel, message):
         self.bot.handle_privmsg(self, user, channel, message)
@@ -40,3 +44,7 @@ class FuProtocol(object, irc.IRCClient):
         if len(message) > 400:
             message = message[0:400] + '... truncated'
         irc.IRCClient.msg(self, user, message, length)
+
+    def quit(self, message=''):
+        log.msg('Sending quit to [%s]' % self.network.name)
+        self.sendLine('QUIT :%s' % message)
