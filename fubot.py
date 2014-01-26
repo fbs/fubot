@@ -3,8 +3,6 @@
 from twisted.python import log
 from twisted.internet import reactor
 
-from core.factory import FuNetwork
-from core.protocol import FuProtocol
 from core.fubot import Fubot
 
 import json
@@ -12,21 +10,20 @@ import argparse
 
 DEFAULT_SETTINGS = 'settings.json'
 
-parser = argparse.ArgumentParser(prog='Fubot')
+PARSER = argparse.ArgumentParser(prog='Fubot')
 
-parser.add_argument('-c', '--config', dest='conffile',
+PARSER.add_argument('-c', '--config', dest='conffile',
                     help='The configuration file to use',
                     metavar='config_file',
                     action='store', default=DEFAULT_SETTINGS)
 
-
-if __name__ == '__main__':
-    args = parser.parse_args()
-
+def main():
+    """Load the config file and start everything"""
+    args = PARSER.parse_args()
     conffile = args.conffile
 
-    with open(conffile) as fd:
-        config = json.load(fd)
+    with open(conffile) as fdes:
+        config = json.load(fdes)
 
     name = config.get('logfile', None)
 
@@ -39,4 +36,8 @@ if __name__ == '__main__':
 
     fubot = Fubot(reactor, conffile, config)
     reactor.callWhenRunning(fubot.start)
+    reactor.addSystemEventTrigger('before', 'shutdown', fubot.shutdown)
     reactor.run()
+
+if __name__ == '__main__':
+    main()
