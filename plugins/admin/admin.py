@@ -24,7 +24,13 @@ class Admin(object):
             return True
         return False
 
-    def handle(self, proto, user, channel, args):
+    def help(self, command):
+        return 'Can\'t help you on this'
+
+    def list_commands(self):
+        return ['admin']
+
+    def handle(self, proto, command, user, channel, args):
         if not self.is_owner(user):
             proto.msg(channel, '%s: You\'re not my owner :o' % user[0])
             log.msg('%s tried to execute admin commands' % user)
