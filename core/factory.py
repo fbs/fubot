@@ -42,7 +42,7 @@ class FuNetwork(RCF):
     def clientConnectionFailed(self, connector, reason):
         """Handle a failed connection"""
         log.msg('Failed to connect to [%s]: %s' % (self.name, reason))
-        RCF.clientConnectionFailed(connector, reason)
+        RCF.clientConnectionFailed(self, connector, reason)
 
     @property
     def name(self):
