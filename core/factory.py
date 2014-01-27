@@ -52,7 +52,7 @@ class FuNetwork(RCF):
     @property
     def port(self):
         """Port number"""
-        return self.config.get('port', 6667)
+        return int(self.config.get('port', 6667))
 
     @property
     def address(self):
