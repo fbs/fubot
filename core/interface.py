@@ -12,7 +12,7 @@ class IInitialize(IPlugin):
         """Initialize the plugin with settings from `conf`"""
         pass
 
-class IFinalize(eIPlugin):
+class IFinalize(IPlugin):
     """Interface for plugins that need to be finalized before unloading"""
     def finalize():
         """Called before the plugin gets unloaded"""
@@ -30,6 +30,14 @@ class IMsgHandler(IPlugin):
         proto -- The protocol instance
         user -- username in ['nick', 'realname', 'hostname'] format
         args -- The message sent as list"""
+        pass
+
+    def help(command):
+        """Return a help string"""
+        pass
+
+    def list_commands():
+        """Return a list of supported commands"""
         pass
 
 class IRawMsgHandler(IPlugin):

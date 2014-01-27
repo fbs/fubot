@@ -70,6 +70,25 @@ class Fubot(object):
 
     quit = stop
 
+    def help(self, proto, user, channel, args):
+        """Help the user"""
+        help = ''
+
+        if args:
+            command = args[0]
+            plugins = plugin_manager.filter(interface=IMsgHandler,
+                                            command=command)
+            if plugins:
+                help = plugins[0].help(command)
+            else:
+                help = 'Sorry, can\'t help you with that command...'
+        else:
+            plugins = plugin_manager.filter(interface=IMsgHandler)
+            help = 'Plugins enabled: '
+            for plugin in plugins:
+                help += plugin.name + ' '
+        proto.msg(channel, '%s: %s' % (user, help))
+
     def handle_privmsg(self, proto, user, channel, message):
         """Handle private messages"""
         cmd = ''
@@ -100,6 +119,10 @@ class Fubot(object):
 
         # Skip invalid commands
         else:
+            return
+
+        if cmd == 'help':
+            self.help(proto, user[0], channel, args)
             return
 
         # log.msg("Command: %s" % cmd)
