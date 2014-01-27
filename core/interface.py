@@ -24,7 +24,7 @@ class IMsgHandler(IPlugin):
         """Return True if the plugin accepts command `cmd`, False otherwise"""
         pass
 
-    def handle(proto, user, channel, args):
+    def handle(proto, command, user, channel, args):
         """Handle a privmsg
 
         proto -- The protocol instance

@@ -106,4 +106,4 @@ class Fubot(object):
         plugins = plugin_manager.filter(interface=IMsgHandler, command=cmd)
         for plugin in plugins:
             # log.msg("Plugin found: %s" % plugin.name)
-            plugin.handle(proto, user, channel, args)
+            plugin.handle(proto, cmd, user, channel, args)
