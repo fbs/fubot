@@ -53,7 +53,8 @@ class Fubot(object):
         for name in self.connections:
             log.msg('Disconnecting from network [%s]' % name)
             connection = self.connections[name].connection
-            connection.quit(msg)
+            if connection:
+                connection.quit(msg)
         self.connections = {}
 
         plugin_manager.stop()
