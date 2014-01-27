@@ -2,6 +2,7 @@ from twisted.words.protocols import irc
 from twisted.python import log
 
 class FuProtocol(object, irc.IRCClient):
+    """The FuProtocol"""
     nickname = 'fubot'
 
     lineRate = 1
