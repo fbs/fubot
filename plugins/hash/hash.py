@@ -19,7 +19,7 @@ class Hash(object):
             return True
         return False
 
-    def handle(self, proto, user, channel, args):
+    def handle(self, proto, command, user, channel, args):
         user = user[0]
         if len(args) == 0:
             proto.msg(channel, '%s: Supported algorithms: %s' %
@@ -40,6 +40,12 @@ class Hash(object):
         h.update(str)
         proto.msg(channel, '%s: %s' % (user, h.hexdigest()))
 
+    def help(self, command):
+        return ('Hash a message. Invocation without arguments gives a ' +
+        'list of supported formats - %s <format> <message>' % command)
+
+    def list_commands(self):
+        return ['hash']
 
 hash = Hash()
 plugin_manager.register(hash)

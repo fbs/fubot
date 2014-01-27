@@ -45,7 +45,7 @@ class Urban(object):
             return True
         return False
 
-    def handle(self, proto, user, channel, args):
+    def handle(self, proto, command, user, channel, args):
         user = user[0]
         self.query  = ' '.join(args)
         self.weburl = _make_weburl(self.query)
@@ -88,6 +88,12 @@ class Urban(object):
         elif r == internet_error.ConnectError:
             proto.msg(channel, '%s: Urban: Couldn\'t connect to the server, sorry :(' % user)
 
+    def help(self, command):
+        return 'Lookup a term on urban dictionary - %s <term>' % command
+        pass
+
+    def list_commands(self):
+        return ['urban']
 
 urban = Urban()
 plugin_manager.register(urban)

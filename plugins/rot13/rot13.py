@@ -32,7 +32,7 @@ class Rot13(object):
             return True
         return False
 
-    def handle(self, proto, user, channel, args):
+    def handle(self, proto, command, user, channel, args):
         """Handle an irc message"""
         user = user[0]
 
@@ -44,6 +44,12 @@ class Rot13(object):
         rotated = rotate(13, line)
         print rotated
         proto.msg(channel, '%s: %s' % (user, rotated))
+
+    def help(self, command):
+        return 'Rot13 a string - %s <message>' % command
+
+    def list_commands(self):
+        return ['rot13']
 
 ROT = Rot13()
 plugin_manager.register(ROT)
