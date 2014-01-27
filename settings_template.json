@@ -4,8 +4,8 @@
     "networks": [
         {
             "name": "localhost",
-            "hostname": "localhost",
-            "port": "6667",
+            "address": "localhost",
+            "port": 6667,
             "ssl": "False",
             "channels": [
                 {
@@ -18,9 +18,10 @@
         }
     ],
     "plugins": [
-        { "name": "plugins.ping.ping" },
-        { "name": "plugins.hash.hash" },
-        { "name": "plugins.urbandict.urbandict" },
-        { "name": "plugins.titlefetcher.titlefetcher" }
+        { "name": "ping" },
+        { "name": "hash" },
+        { "name": "urbandict" },
+        { "name": "titlefetcher" },
+        { "name": "rot13" }
     ]
 }
