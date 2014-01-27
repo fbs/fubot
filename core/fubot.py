@@ -43,14 +43,6 @@ class Fubot(object):
         for plugin in plugins:
             plugin_manager.load(plugin.get('name', ''))
 
-        # Find all plugins that need to be initialized
-        plugins = plugin_manager.filter(interface=IInitialize)
-        plugin_data = self.config.get('plugin-data', '')
-        for plugin in plugins:
-            data = plugin_data.get(plugin.name, '')
-            # log.msg('plugin data: %s' % data)
-            plugin.initialize(data)
-
         # Connect to the networks
         self._connect()
 

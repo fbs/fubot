@@ -1,4 +1,4 @@
-from core.interface import IFinalize, IPlugin
+from core.interface import IFinalize, IPlugin, IInitialize
 from twisted.python import log
 
 from importlib import import_module
@@ -132,6 +132,9 @@ class PluginManager(object):
             self.plugins.append(plugin)
             log.msg('Registered plugin [%s] version %s, by %s' %
                     (plugin.name, plugin.version, plugin.author))
+        if IInitialize.providedBy(plugin):
+            log.msg('Initializing plugin [%s]' % plugin.name)
+            plugin.initialize()
 
 ## Singleton
 plugin_manager = PluginManager()
