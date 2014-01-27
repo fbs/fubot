@@ -1,19 +1,17 @@
-from twisted.internet import reactor
 from twisted.python import log
-from twisted.words.protocols import irc
 
 from core.factory import FuNetwork
 from core.pluginmanager import plugin_manager
-from core.interface import *
+from core.interface import IInitialize, IMsgHandler, IRawMsgHandler
 
 def _split_user(user):
     """Split nick!name@host into [nick, name, host]"""
-    u, _ = user.split("!")
-    r, h = _.split("@")
-    return [u, r, h]
+    user, _ = user.split("!")
+    realname, host = _.split("@")
+    return [user, realname, host]
 
 class Fubot(object):
-
+    """The Fubot"""
     quitting = False
     quitmsg = 'time to go'
 
@@ -27,13 +25,14 @@ class Fubot(object):
     def _connect(self):
         """Connect to networks"""
         for nwconfig in self.config['networks']:
-            nw = FuNetwork(self.reactor, self, nwconfig)
-            self.connections[nw.name] = nw
-            nw.connect()
+            network = FuNetwork(self.reactor, self, nwconfig)
+            self.connections[network.name] = network
+            network.connect()
             log.msg('Connected to network [%s] as [%s]' %
-                    (nw.name, nw.protocol.nickname))
+                    (network.name, network.protocol.nickname))
 
     def _sigint(self, signal, frame):
+        """Sigint handler"""
         self.stop('Oh my, received SIGINT :/')
 
     def start(self):
@@ -41,11 +40,11 @@ class Fubot(object):
         networks in the config file """
         # Get plugins from config file and load them
         plugins = self.config.get('plugins', [])
-        for p in plugins:
-            plugin_manager.load(p.get('name', ''))
+        for plugin in plugins:
+            plugin_manager.load(plugin.get('name', ''))
 
         # Find all plugins that need to be initialized
-        plugins = plugin_manager.filter(interface = IInitialize)
+        plugins = plugin_manager.filter(interface=IInitialize)
         plugin_data = self.config.get('plugin-data', '')
         for plugin in plugins:
             data = plugin_data.get(plugin.name, '')
@@ -63,7 +62,7 @@ class Fubot(object):
             log.msg('Disconnecting from network [%s]' % name)
             connection = self.connections[name].connection
             connection.quit(msg)
-        self.networks = {}
+        self.connections = {}
 
         plugin_manager.stop()
 
