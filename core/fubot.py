@@ -79,7 +79,7 @@ class Fubot(object):
             plugins = plugin_manager.filter(interface=IMsgHandler,
                                             command=command)
             if plugins:
-                help = plugins[0].help(command)
+                help = '[%s] %s' % (command, plugins[0].help(command))
             else:
                 help = 'Sorry, can\'t help you with that command...'
         else:
@@ -88,6 +88,9 @@ class Fubot(object):
             for plugin in plugins:
                 help += plugin.name + ' '
         proto.msg(channel, '%s: %s' % (user, help))
+
+    def info(self, proto, user, channel):
+        proto.msg(channel, 'Hi %s! Im fubot, another useless bot' % user[0])
 
     def handle_privmsg(self, proto, user, channel, message):
         """Handle private messages"""
@@ -121,8 +124,14 @@ class Fubot(object):
         else:
             return
 
+        # Help is easier to handle here
         if cmd == 'help':
             self.help(proto, user[0], channel, args)
+            return
+
+        # Same for info
+        if cmd == 'info':
+            self.info(proto, user, channel)
             return
 
         # log.msg("Command: %s" % cmd)

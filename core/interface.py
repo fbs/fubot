@@ -28,8 +28,10 @@ class IMsgHandler(IPlugin):
         """Handle a privmsg
 
         proto -- The protocol instance
+        command -- The command issued
         user -- username in ['nick', 'realname', 'hostname'] format
-        args -- The message sent as list"""
+        channel -- channel
+        args -- The rest of the message as list"""
         pass
 
     def help(command):
