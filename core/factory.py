@@ -19,17 +19,20 @@ class FuNetwork(RCF):
         self.config = config
 
     def connect(self):
+        """Connect to a network using the settings from the config file
+        supplied during init"""
         if (self.config.get('ssl', 'False')) == 'True':
-            self.reactor.connectSSL(self.config['hostname'],
-                                    int(self.config.get('port', 6697)),
+            self.reactor.connectSSL(self.address,
+                                    self.port,
                                     self,
                                     ssl.ClientContextFactory())
         else:
-            self.reactor.connectTCP(self.config['hostname'],
-                                    int(self.config.get('port', 6667)),
+            self.reactor.connectTCP(self.address,
+                                    self.port,
                                     self)
 
     def clientConnectionLost(self, connector, unused_reason):
+        """Handle a lost connection"""
         if self.bot.quitting:
             log.msg('Factory shutting down, quitting')
             return
@@ -37,10 +40,21 @@ class FuNetwork(RCF):
         log.msg('Factory reconnecting')
 
     def clientConnectionFailed(self, connector, reason):
+        """Handle a failed connection"""
         log.msg('Failed to connect to [%s]: %s' % (self.name, reason))
         RCF.clientConnectionFailed(connector, reason)
 
-    ## Network name
     @property
     def name(self):
-        return self.config.get('name', 'fubot')
+        """Network name"""
+        return self.config.get('name', None)
+
+    @property
+    def port(self):
+        """Port number"""
+        return self.config.get('port', 6667)
+
+    @property
+    def address(self):
+        """Network address"""
+        return self.config.get('address')
