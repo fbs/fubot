@@ -34,6 +34,7 @@ class Admin(object):
         if not self.is_owner(user):
             proto.msg(channel, '%s: You\'re not my owner :o' % user[0])
             log.msg('%s tried to execute admin commands' % user)
+            return
 
         if len(args) < 1:
             proto.msg(channel, '%s: No arguments..?' % user[0])
