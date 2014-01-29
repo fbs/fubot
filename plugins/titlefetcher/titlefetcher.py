@@ -3,6 +3,8 @@ from twisted.python import log
 import re
 import iptools
 import urlparse
+from bs4 import BeautifulSoup
+
 from zope.interface import implements
 from core.interface import IPlugin, IRawMsgHandler
 from core.pluginmanager import plugin_manager
@@ -15,6 +17,8 @@ INTERNAL_IPS = iptools.IpRangeList(
     'fe80::/10',
     'fc00::/7'
 )
+
+REGEX_URL = re.compile(r"(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'\".,<>?]))", flags=re.IGNORECASE)
 
 def acceptable_netloc(hostname):
     ok = True
@@ -33,13 +37,10 @@ class TitleFetcher(object):
     version = '0.1'
     author = 'fbs'
 
-    regex_url = re.compile(r"(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'\".,<>?]))", flags=re.IGNORECASE)
-
-    regex_title = re.compile(r'<title>(.*?)</title>', flags=re.IGNORECASE)
-
+    # Thanks to cardinal https://github.com/JohnMaguire2013/Cardinal
     def handle(self, proto, user, channel, msg):
         user = user[0]
-        m = self.regex_url.search(msg)
+        m = REGEX_URL.search(msg)
         if m != None:
             url = m.group(0)
             if not acceptable_netloc(urlparse.urlparse(url).netloc):
@@ -49,17 +50,24 @@ class TitleFetcher(object):
 
             if url[:7].lower() != "http://" and url[:8].lower() != "https://":
                 url = "http://" + url
-            d = getPage(url).addCallback(self.send_title, proto, user, channel)
+
+            log.msg('Url found [%s]' % url)
+            d = getPage(url)
+            d.addErrback(self.errback)
+            d.addCallback(self.send_title, proto, user, channel)
             # No errbacks, dont want to flood chat with crap
 
+    def errback(self, failure):
+        log.err('[Titlefetcher] %s' % failure.getErrorMessage())
+
     def send_title(self, page, proto, user, channel):
-        iter = self.regex_title.finditer(page)
-        try:
-            title = iter.next().groups()[0]
-            log.msg("Title: ", title, 'Channel ', channel)
-            proto.msg(channel, 'title: %s' % title)
-        except StopIteration:
-            pass
+        """Callback that searches page `page` for a title and sends it to
+        the channel if found"""
+        soup = BeautifulSoup(page)
+        title = soup.title.string.strip().encode('ascii')
+        log.msg('Title = %s' % title)
+        proto.msg(channel, title)
+
 
 o = TitleFetcher()
 plugin_manager.register(o)
