@@ -65,7 +65,6 @@ class TitleFetcher(object):
         the channel if found"""
         soup = BeautifulSoup(page)
         title = soup.title.string.strip().encode('ascii')
-        log.msg('Title = %s' % title)
         proto.msg(channel, title)
 
 
