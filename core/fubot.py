@@ -83,7 +83,10 @@ class Fubot(object):
         proto.msg(channel, '%s: %s' % (user, help))
 
     def info(self, proto, user, channel):
-        proto.msg(channel, 'Hi %s! Im fubot, another useless bot' % user[0])
+        """Give some bot info"""
+        proto.msg(channel, 'Hi %s! Im fubot, another useless bot. See %s'
+                  % (user[0], 'https://github.com/fbs/fubot') + 
+                  ' to find out more about the sad mess that I am')
 
     def handle_privmsg(self, proto, user, channel, message):
         """Handle private messages"""
