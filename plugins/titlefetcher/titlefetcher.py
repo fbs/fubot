@@ -64,7 +64,7 @@ class TitleFetcher(object):
         """Callback that searches page `page` for a title and sends it to
         the channel if found"""
         soup = BeautifulSoup(page)
-        title = soup.title.string.strip().encode('ascii')
+        title = soup.title.string.strip().encode('ascii', 'ignore')
         proto.msg(channel, 'title: %s' % title)
 
 
