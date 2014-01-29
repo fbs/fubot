@@ -40,23 +40,39 @@ class Admin(object):
             return
 
         cmd = args[0]
-        args = ' '.join(args[1:])
+        args = args[1:]
 
+        log.msg('Admin Command [%s]' % cmd)
         if cmd == 'quit':
             proto.bot.quit()
             return
 
         if cmd == 'load':
-            plugin_manager.load(args)
+            for arg in args:
+                plugin_manager.load(arg)
+            return
+
+        if cmd == 'unload':
+            for arg in args:
+                plugin_manager.unload(arg)
             return
 
         if cmd == 'reload':
-            plugin_manager.reload(args)
+            for arg in args:
+                plugin_manager.reload(arg)
             return
 
         if cmd == 'reload_all':
             plugin_manager.reload_all()
             return
+
+        if cmd == 'list':
+            #FIXME
+            plugins = plugin_manager.plugins
+            line = ''
+            for name in plugins:
+                line += name + ' '
+            proto.msg(channel, '%s: %s' % (user[0], line))
 
 admin = Admin()
 plugin_manager.register(admin)
