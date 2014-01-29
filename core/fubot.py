@@ -77,9 +77,9 @@ class Fubot(object):
                 help = 'Sorry, can\'t help you with that command...'
         else:
             plugins = plugin_manager.filter(interface=IMsgHandler)
-            help = 'Plugins enabled: '
+            help = 'Commands: '
             for plugin in plugins:
-                help += plugin.name + ' '
+                help += plugin.list_commands()[0] + ' '
         proto.msg(channel, '%s: %s' % (user, help))
 
     def info(self, proto, user, channel):
