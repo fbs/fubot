@@ -31,8 +31,8 @@ def _try_import(name):
     """Try to import plugin `name`"""
     try:
         import_module(name)
-    except ImportError:
-        log.msg('Failed to import [%s]' % name)
+    except ImportError as e:
+        log.msg('Failed to import [%s]: %s' % (name, e))
         return False
     else:
         return True
