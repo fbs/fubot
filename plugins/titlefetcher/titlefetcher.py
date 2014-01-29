@@ -53,8 +53,8 @@ class TitleFetcher(object):
 
             log.msg('Url found [%s]' % url)
             d = getPage(url)
-            d.addErrback(self.errback)
             d.addCallback(self.send_title, proto, user, channel)
+            d.addErrback(self.errback)
             # No errbacks, dont want to flood chat with crap
 
     def errback(self, failure):
