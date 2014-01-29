@@ -2,6 +2,7 @@ from core.interface import IFinalize, IPlugin, IInitialize
 from twisted.python import log
 
 from importlib import import_module
+import sys
 
 def filter_interface(plugins, interface):
     """Find all plugins in `plugins` that provide interface `interface`"""
@@ -16,18 +17,22 @@ def _import(name):
     return _try_import('plugins.%s.%s' % (name, name))
 
 
-def _reload(name):
-    """Try to reload plugin `name`"""
+def _import_or_reload(name):
+    """Try to import or reload plugin `name`"""
     ## TEH HORROR
-    import sys
-    mod = sys.modules['plugins.%s.%s' % (name, name)]
-    reload(mod)
+    pname = 'plugins.%s.%s' % (name, name)
+    mod = sys.modules.get(pname, None)
+    if  mod:
+        reload(mod)
+    else:
+        _try_import(pname)
 
 def _try_import(name):
     """Try to import plugin `name`"""
     try:
         import_module(name)
     except ImportError:
+        log.msg('Failed to import [%s]' % name)
         return False
     else:
         return True
@@ -43,16 +48,19 @@ class PluginManager(object):
     stopped = False
 
     def __init__(self):
-        self.plugins = []
+        self.plugins = {}
 
 ### PRIVATE
-
-    def _remove(self, plugin):
+    def _remove(self, name):
         """Remove a loaded plugin"""
-        self.plugins.remove(plugin)
+        self.plugins.pop(name)
+
+    def _add(self, plugin):
+        """Add a newly loaded plugin"""
+        self.plugins[plugin.name] = plugin
 
     def _is_loaded(self, name):
-        """Return True if a plugin with name `name` is loaded,
+        """Return True if a plugin with name `name` is in the plugins list,
         False otherwise"""
         if self._findname(name):
             return True
@@ -60,51 +68,52 @@ class PluginManager(object):
 
     def _findname(self, name):
         """Find and return the plugin with name `name`"""
-        for plugin in self.plugins:
-            if plugin.name == name:
-                return plugin
-            return None
+        return self.plugins.get(name, None)
 
 ### PUBLIC
 
     def load(self, name):
         """Load a plugin"""
         if self._is_loaded(name):
+            log.msg('[load] Plugin already loaded [%s]' % name)
             return
-        log.msg('Loading plugin [%s]' % name)
-        _import(name)
+        log.msg('[load] Loading plugin [%s]' % name)
+        _import_or_reload(name)
 
     def unload(self, name):
         """Unload a plugin"""
         plugin = self._findname(name)
         if not plugin:
+            log.msg('[unload] Plugin not loaded [%s]' % name)
             return
-        log.msg('Unloading plugin [%s]' % name)
+        log.msg('[unload] Unloading plugin [%s]' % name)
         _finalize(plugin)
-        self._remove(plugin)
+        self._remove(name)
 
     def reload(self, name):
         """Reload a plugin"""
         plugin = self._findname(name)
         if not plugin:
+            log.msg('[reload] Plugin not loaded [%s]' % name)
             return
-        log.msg('Reloading plugin [%s]' % name)
+        log.msg('[reload] Reloading plugin [%s]' % name)
         _finalize(plugin)
-        self._remove(plugin)
-        _reload(name)
+        self._remove(name)
+        _import_or_reload(name)
 
     def reload_all(self):
         """Reload all loaded plugins"""
+        #log.msg('Called reload')
         names = []
-        log.msg('Reloading all plugins')
-        for plugin in self.plugins:
-            names.append(plugin.name)
+        log.msg('[reload_all] Reloading all plugins %s' % names)
+        for name in self.plugins:
+            plugin = self.plugins[name]
+            names.append(name)
             _finalize(plugin)
-            self._remove(plugin)
 
-        self.plugins = []
+        self.plugins = {}
         for name in names:
-            _reload(name)
+            _import_or_reload(name)
 
     def stop(self):
         """Stop the pluginmanager, finalize and remove all plugins"""
@@ -118,18 +127,18 @@ class PluginManager(object):
 
     def filter(self, interface=None, command=None):
         "Return a list of plugins matching the filter options"""
-        plugins = self.plugins
+        plugins = [self.plugins[d] for d in self.plugins]
         if interface:
             plugins = filter_interface(plugins, interface)
-            if command:
-                plugins = filter_command(plugins, command)
+        if command:
+            plugins = filter_command(plugins, command)
 
         return plugins
 
     def register(self, plugin):
         """Register a new plugin, used by the plugin itself"""
         if IPlugin.providedBy(plugin):
-            self.plugins.append(plugin)
+            self._add(plugin)
             log.msg('Registered plugin [%s] version %s, by %s' %
                     (plugin.name, plugin.version, plugin.author))
         if IInitialize.providedBy(plugin):
