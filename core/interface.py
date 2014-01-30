@@ -6,12 +6,6 @@ class IPlugin(Interface):
     version = Attribute("Version")
     author = Attribute("Author")
 
-class IInitialize(IPlugin):
-    """Interface for plugins that need initialization"""
-    def initialize(conf):
-        """Initialize the plugin with settings from `conf`"""
-        pass
-
 class IFinalize(IPlugin):
     """Interface for plugins that need to be finalized before unloading"""
     def finalize():
