@@ -4,14 +4,14 @@ from core.protocol import FuProtocol
 
 from twisted.python import log
 
-class FuNetwork(RCF):
+class FuFactory(RCF):
     """Custom factory"""
     protocol = FuProtocol
 
     connection = None
 
     def buildProtocol(self, addr):
-        return self.protocol(self.reactor, self.bot, self)
+        return self.protocol(self.reactor, self.bot, self, self.config)
 
     def __init__(self, reactor, bot, config):
         self.reactor = reactor

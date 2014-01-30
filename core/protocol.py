@@ -15,30 +15,31 @@ class FuProtocol(object, irc.IRCClient):
 
     channels = None
 
-    def __init__(self, reactor, bot, network):
+    def __init__(self, reactor, bot, factory, config):
         self.reactor = reactor
         self.bot = bot
-        self.network = network
+        self.factory = factory
+        self.config = config
 
     def signedOn(self):
-        channels = self.network.config.get('channels', ())
+        channels = self.config.get('channels', ())
 
-        if 'nickserv' in self.network.config:
+        if 'nickserv' in self.config:
             log.msg('Nickserv setting found')
             self.msg('nickserv', 'IDENTIFY %s' %
-                     self.network.config['nickserv'].encode('ascii'))
+                     self.config['nickserv'].encode('ascii'))
 
         for chan in channels:
             self.join(chan['name'].encode('ascii'))
 
     def connectionMade(self):
-        self.network.connection = self
+        self.factory.connection = self
         self.channels = []
         irc.IRCClient.connectionMade(self)
 
     def connectionLost(self, reason):
-        log.msg('Lost connection to [%s]: %s' % (self.network.name, reason))
-        self.network.connection = None
+        log.msg('Lost connection to [%s]: %s' % (self.networkname, reason))
+        self.factory.connection = None
         self.channels = []
         irc.IRCClient.connectionLost(self, reason)
 
@@ -64,5 +65,9 @@ class FuProtocol(object, irc.IRCClient):
         irc.IRCClient.msg(self, user, message, length)
 
     def quit(self, message=''):
-        log.msg('Sending quit to [%s]' % self.network.name)
+        log.msg('Sending quit to [%s]' % self.networkname)
         self.sendLine('QUIT :%s' % message)
+
+    @property
+    def networkname(self):
+        return self.factory.name

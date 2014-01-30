@@ -1,6 +1,6 @@
 from twisted.python import log
 
-from core.factory import FuNetwork
+from core.factory import FuFactory
 from core.pluginmanager import plugin_manager
 from core.interface import IInitialize, IMsgHandler, IRawMsgHandler
 
@@ -25,7 +25,7 @@ class Fubot(object):
     def _connect(self):
         """Connect to networks"""
         for nwconfig in self.config['networks']:
-            network = FuNetwork(self.reactor, self, nwconfig)
+            network = FuFactory(self.reactor, self, nwconfig)
             self.connections[network.name] = network
             network.connect()
             log.msg('Connected to network [%s] as [%s]' %
