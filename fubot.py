@@ -38,7 +38,7 @@ def main():
     fubot = Fubot(reactor, conffile, config)
     signal.signal(signal.SIGINT, fubot._sigint)
     reactor.callWhenRunning(fubot.start)
-    reactor.addSystemEventTrigger('before','shutdown', plugin_manager.stop)
+    reactor.addSystemEventTrigger('before', 'shutdown', plugin_manager.stop)
     reactor.run()
 
 if __name__ == '__main__':
