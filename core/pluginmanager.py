@@ -91,6 +91,12 @@ class PluginLoader():
         self.unload(name)
         self.load(name)
 
+    def reload_all(self):
+        """Reload all plugins"""
+        names = [name for name in self.plugins]
+        for name in names:
+            self.reload(name)
+
 class PluginManager():
     """Does the stuff"""
     def __init__(self):
@@ -98,6 +104,15 @@ class PluginManager():
         self.globals = set()
         self.loader = PluginLoader()
 
+    def _create_if_not_exists(self, network, channel):
+        """Add a network or channel to the plugin map if needed"""
+        if network not in self.map:
+            self.map[network] = dict()
+
+        if channel not in self.map[network]:
+            self.map[network][channel] = set()
+
+######################
     def stop(self):
         """Stop the plugin manager, unload all plugins"""
         self.map.clear()
@@ -108,28 +123,41 @@ class PluginManager():
         self._create_if_not_exists(network, channel)
         if self.loader.load(plugin_name):
             self.map[network][channel].add(plugin_name)
+            log.msg('[pluginmanager] Enable plugin [%s] for [%s %s]' %
+                    (name, network, channel))
 
     def enable_global(self, plugin_name):
         """Enable a global plugin"""
         if self.loader.load(plugin_name):
             self.globals.add(plugin_name)
+            log.msg('[pluginmanager] Enable global plugin [%s]' % plugin_name)
 
     def disable(self, network, channel, plugin_name):
         """Disable a plugin"""
         self._create_if_not_exists(network, channel)
         if plugin_name in self.map[network][channel]:
             self.map[network][channel].remove(plugin_name)
+            log.msg('[pluginmanager] Disable plugin [%s] for [%s %s]' %
+                    (name, network, channel))
 
-    def _create_if_not_exists(self, network, channel):
-        """Add a network or channel to the plugin map if needed"""
-        if network not in self.map:
-            self.map[network] = dict()
-
-        if channel not in self.map[network]:
-            self.map[network][channel] = set()
+    def disable_global(self, plugin_name):
+        """Disable a global plugin"""
+        if plugin_name in self.globals:
+            self.globals.remove(plugin_name)
+            log.msg('[pluginmanager] Disable global plugin [%s]' % plugin_name)
 
     def filter(self, network, channel, interface=None, command=None):
         """Return a list of plugins matching the filter parameters"""
         self._create_if_not_exists(network, channel)
         plugin_names = self.map[network][channel].union(self.globals)
         return self.loader.filter(plugin_names, interface, command)
+
+    def reload_plugin(self, name):
+        """Reload a plugin"""
+        log.msg('[pluginmanager] Reloading plugin [%s]' % name)
+        self.loader.reload(name)
+
+    def reload_all_plugins(self):
+        """Reload all plugins"""
+        log.msg('[pluginmanager] Reloading all plugins')
+        self.loader.reload_all()
