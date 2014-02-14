@@ -71,6 +71,7 @@ class Fubot(object):
     def help(self, proto, user, channel, args):
         """Help the user"""
         help = ''
+        user = user[0]
 
         if args:
             command = args[0]
@@ -91,17 +92,24 @@ class Fubot(object):
                 help += plugin.list_commands()[0] + ' '
         proto.msg(channel, '%s: %s' % (user, help))
 
-    def info(self, proto, user, channel):
+    def info(self, proto, user, channel, args):
         """Give some bot info"""
         proto.msg(channel, 'Hi %s! Im fubot, another useless bot. See %s'
                   % (user[0], 'https://git hub.com/fbs/fubot') +
                   ' to find out more about the sad mess that I am')
+
+    def admin(self, proto, user, channel, message):
+        pass
 
     def handle_privmsg(self, proto, user, channel, message):
         """Handle private messages"""
         cmd = ''
         args = ''
         user = _split_user(user)
+
+        internalcmd = {'info': self.info,
+                       'help': self.help,
+                       'admin': self.admin}
 
         plugins = self.plugins.filter(proto.network,
                                       channel,
@@ -132,14 +140,8 @@ class Fubot(object):
         else:
             return
 
-        # Help is easier to handle here
-        if cmd == 'help':
-            self.help(proto, user[0], channel, args)
-            return
-
-        # Same for info
-        if cmd == 'info':
-            self.info(proto, user, channel)
+        if cmd in internalcmd:
+            internalcmd[cmd](proto, user, channel, args)
             return
 
         # log.msg("Command: %s" % cmd)
