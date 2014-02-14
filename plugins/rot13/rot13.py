@@ -1,7 +1,6 @@
 from zope.interface import implements
 
 from core.interface import  IMsgHandler
-from core.pluginmanager import plugin_manager
 
 def rotate(shift, line):
     """Rotate every alphabetic character in `line` by `shift` places"""
@@ -51,5 +50,5 @@ class Rot13(object):
     def list_commands(self):
         return ['rot13']
 
-ROT = Rot13()
-plugin_manager.register(ROT)
+def register():
+    return Rot13()

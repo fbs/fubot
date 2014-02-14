@@ -1,8 +1,7 @@
 from zope.interface import implements
 from twisted.python import log
 
-from core.interface import IPlugin, IMsgHandler
-from core.pluginmanager import plugin_manager
+from core.interface import IMsgHandler
 
 class Admin(object):
     implements(IMsgHandler)
@@ -45,35 +44,22 @@ class Admin(object):
 
         log.msg('Admin Command [%s]' % cmd)
         if cmd == 'quit':
-            proto.bot.quit()
             return
 
         if cmd == 'load':
-            for arg in args:
-                plugin_manager.load(arg)
             return
 
         if cmd == 'unload':
-            for arg in args:
-                plugin_manager.unload(arg)
             return
 
         if cmd == 'reload':
-            for arg in args:
-                plugin_manager.reload(arg)
             return
 
         if cmd == 'reload_all':
-            plugin_manager.reload_all()
             return
 
         if cmd == 'list':
-            #FIXME
-            plugins = plugin_manager.plugins
-            line = ''
-            for name in plugins:
-                line += name + ' '
-            proto.msg(channel, '%s: %s' % (user[0], line))
+            return
 
-admin = Admin()
-plugin_manager.register(admin)
+def register():
+    return Admin()

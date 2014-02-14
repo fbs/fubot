@@ -12,8 +12,8 @@ try:
 except ImportError:
     import urllib as parser
 
-from core.interface import IPlugin, IMsgHandler
-from core.pluginmanager import plugin_manager
+from core.interface import IMsgHandler
+
 
 def _make_apiurl(query):
     APIURL = 'http://api.urbandictionary.com/v0/define?term=%s'
@@ -95,5 +95,5 @@ class Urban(object):
     def list_commands(self):
         return ['urban']
 
-urban = Urban()
-plugin_manager.register(urban)
+def register():
+    return Urban()

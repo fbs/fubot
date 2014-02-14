@@ -1,8 +1,8 @@
 from zope.interface import implements
 from twisted.python import log
 
-from core.interface import IPlugin, IMsgHandler
-from core.pluginmanager import plugin_manager
+from core.interface import IMsgHandler
+
 
 import hashlib
 
@@ -47,5 +47,5 @@ class Hash(object):
     def list_commands(self):
         return ['hash']
 
-hash = Hash()
-plugin_manager.register(hash)
+def register():
+    return Hash()

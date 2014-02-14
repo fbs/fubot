@@ -6,8 +6,8 @@ import urlparse
 from bs4 import BeautifulSoup
 
 from zope.interface import implements
-from core.interface import IPlugin, IRawMsgHandler
-from core.pluginmanager import plugin_manager
+from core.interface import IRawMsgHandler
+
 
 INTERNAL_IPS = iptools.IpRangeList(
     '127/8',
@@ -67,6 +67,5 @@ class TitleFetcher(object):
         title = soup.title.string.strip().encode('ascii', 'ignore')
         proto.msg(channel, 'title: %s' % title)
 
-
-o = TitleFetcher()
-plugin_manager.register(o)
+def register():
+    return TitleFetcher()
