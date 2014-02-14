@@ -1,8 +1,8 @@
 from twisted.python import log
 
 from core.factory import FuFactory
-from core.pluginmanager import plugin_manager
-from core.interface import IInitialize, IMsgHandler, IRawMsgHandler
+from core.pluginmanager import PluginManager
+from core.interface import  IMsgHandler, IRawMsgHandler
 
 def _split_user(user):
     """Split nick!name@host into [nick, name, host]"""
@@ -20,6 +20,7 @@ class Fubot(object):
         self.connections = dict()
         self.config_filename = conf_filename
         self.config = conf_json
+        self.plugins = PluginManager()
         self.cmdprefix = self.config.get('command-prefix', '@').encode('ascii')
 
     def _connect(self):
@@ -33,7 +34,10 @@ class Fubot(object):
 
     def _sigint(self, signal, frame):
         """Sigint handler"""
-        self.stop('Oh my, received SIGINT :/')
+        if not self.quitting:
+            self.quitting = True
+            log.msg('Received SIGINT')
+            self.stop('Oh my, received SIGINT :/')
 
     def start(self):
         """Load all plugins in the config file and connect to all
@@ -41,7 +45,7 @@ class Fubot(object):
         # Get plugins from config file and load them
         plugins = self.config.get('plugins', [])
         for plugin in plugins:
-            plugin_manager.load(plugin.get('name', ''))
+            self.plugins.enable_global(plugin.get('name', ''))
 
         # Connect to the networks
         self._connect()
@@ -57,7 +61,7 @@ class Fubot(object):
                 connection.quit(msg)
         self.connections = {}
 
-        plugin_manager.stop()
+        self.plugins.stop()
 
         self.reactor.callLater(5, self.reactor.stop)
 
@@ -69,14 +73,18 @@ class Fubot(object):
 
         if args:
             command = args[0]
-            plugins = plugin_manager.filter(interface=IMsgHandler,
-                                            command=command)
+            plugins = self.plugins.filter(proto.network,
+                                          channel,
+                                          interface=IMsgHandler,
+                                          command=command)
             if plugins:
                 help = '[%s] %s' % (command, plugins[0].help(command))
             else:
                 help = 'Sorry, can\'t help you with that command...'
         else:
-            plugins = plugin_manager.filter(interface=IMsgHandler)
+            plugins = self.plugins.filter(proto.network,
+                                          channel,
+                                          interface=IMsgHandler)
             help = 'Commands: '
             for plugin in plugins:
                 help += plugin.list_commands()[0] + ' '
@@ -85,7 +93,7 @@ class Fubot(object):
     def info(self, proto, user, channel):
         """Give some bot info"""
         proto.msg(channel, 'Hi %s! Im fubot, another useless bot. See %s'
-                  % (user[0], 'https://github.com/fbs/fubot') + 
+                  % (user[0], 'https://git hub.com/fbs/fubot') +
                   ' to find out more about the sad mess that I am')
 
     def handle_privmsg(self, proto, user, channel, message):
@@ -94,7 +102,10 @@ class Fubot(object):
         args = ''
         user = _split_user(user)
 
-        plugins = plugin_manager.filter(interface=IRawMsgHandler)
+        plugins = self.plugins.filter(proto.network,
+                                      channel,
+                                      interface=IRawMsgHandler)
+
         for plugin in plugins:
             plugin.handle(proto, user, channel, message)
 
@@ -131,7 +142,10 @@ class Fubot(object):
             return
 
         # log.msg("Command: %s" % cmd)
-        plugins = plugin_manager.filter(interface=IMsgHandler, command=cmd)
+        plugins = self.plugins.filter(proto.network,
+                                      channel,
+                                      interface=IMsgHandler,
+                                      command=cmd)
         for plugin in plugins:
             # log.msg("Plugin found: %s" % plugin.name)
             plugin.handle(proto, cmd, user, channel, args)
