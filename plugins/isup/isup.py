@@ -26,7 +26,6 @@ class IsUp():
 
     def help(self, command):
         return 'Test if a site is up or down  - usage: %s <url>' % command
-        pass
 
     def list_commands(self):
         return self.commands
