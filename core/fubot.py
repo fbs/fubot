@@ -34,10 +34,8 @@ class Fubot(object):
 
     def _sigint(self, signal, frame):
         """Sigint handler"""
-        if not self.quitting:
-            self.quitting = True
-            log.msg('Received SIGINT')
-            self.stop('Oh my, received SIGINT :/')
+        log.msg('Received SIGINT')
+        self.stop('Oh my, received SIGINT :/')
 
     def start(self):
         """Load all plugins in the config file and connect to all
@@ -52,6 +50,9 @@ class Fubot(object):
 
     def stop(self, msg='time to go'):
         """Stop all plugins and disconnect from all networks"""
+        if self.quitting:
+            return
+
         self.quitting = True
 
         for name in self.connections:
