@@ -38,7 +38,7 @@ class FuProtocol(object, irc.IRCClient):
         irc.IRCClient.connectionMade(self)
 
     def connectionLost(self, reason):
-        log.msg('Lost connection to [%s]: %s' % (self.networkname, reason))
+        log.msg('Lost connection to [%s]: %s' % (self.network, reason))
         self.factory.connection = None
         self.channels = []
         irc.IRCClient.connectionLost(self, reason)
@@ -65,9 +65,9 @@ class FuProtocol(object, irc.IRCClient):
         irc.IRCClient.msg(self, user, message, length)
 
     def quit(self, message=''):
-        log.msg('Sending quit to [%s]' % self.networkname)
+        log.msg('Sending quit to [%s]' % self.network)
         self.sendLine('QUIT :%s' % message)
 
     @property
-    def networkname(self):
+    def network(self):
         return self.factory.name
