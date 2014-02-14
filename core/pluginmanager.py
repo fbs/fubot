@@ -60,9 +60,11 @@ class PluginLoader():
 
         module = _import_or_reload(name)
         if not module:
+            log.msg('Unable to load module [%s]' % name)
             return False # unable to load module
 
         if not hasattr(module, 'register'):
+            log.msg('Module has no attribute register [%s]' % name)
             return False # no register function, unable to use
 
         plugin = module.register()
