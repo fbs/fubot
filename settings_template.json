@@ -18,7 +18,6 @@
         }
     ],
     "plugins": [
-        { "name": "admin"},
         { "name": "ping" },
         { "name": "hash" },
         { "name": "urbandict" },
