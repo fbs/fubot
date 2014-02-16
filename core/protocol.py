@@ -48,6 +48,7 @@ class FuProtocol(object, irc.IRCClient):
 
     def joined(self, channel):
         self.channels.append(channel)
+        self.bot.add_channel(self.network, channel)
         log.msg('Joined channel ' + channel)
 
     def left(self, channel):

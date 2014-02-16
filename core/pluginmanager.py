@@ -32,11 +32,7 @@ def _try_import(name):
 
     return mod
 
-def _print_plugin_names(plugins, prefix = ''):
-    for plugin in plugins:
-        print 'DEBUG %s: %s' % (prefix, plugin.name)
-
-class PluginLoader():
+class PluginLoader(object):
     """Does the loading stuff"""
     def __init__(self):
         self.plugins = dict()
@@ -69,7 +65,7 @@ class PluginLoader():
 
         plugin = module.register()
         self.plugins[plugin.name] = plugin
-        log.msg('Registered plugin [%s]' % plugin.name)
+        log.msg('[PluginManager] registered plugin [%s]' % plugin.name)
         return True
 
     def unload(self, name):
@@ -99,22 +95,28 @@ class PluginLoader():
         for name in names:
             self.reload(name)
 
-class PluginManager():
+class PluginManager(object):
     """Does the stuff"""
     def __init__(self):
         self.map = dict()
         self.globals = set()
         self.loader = PluginLoader()
 
-    def _create_if_not_exists(self, network, channel):
-        """Add a network or channel to the plugin map if needed"""
+
+    def add_network(self, network):
+        """Add a network to the PluginManager"""
         if network not in self.map:
             self.map[network] = dict()
+            log.msg('[PluginManager] added network [%s]' % network)
 
+    def add_channel(self, network, channel):
+        """Add a channel to the PluginManager"""
+        self.add_network(network)
         if channel not in self.map[network]:
             self.map[network][channel] = set()
+            log.msg('[PluginManager] added channel [%s:%s]' %
+                    (network, channel))
 
-######################
     def stop(self):
         """Stop the plugin manager, unload all plugins"""
         self.map.clear()
@@ -122,10 +124,9 @@ class PluginManager():
 
     def enable(self, network, channel, plugin_name):
         """Enable a plugin"""
-        self._create_if_not_exists(network, channel)
         if self.loader.load(plugin_name):
             self.map[network][channel].add(plugin_name)
-            log.msg('[pluginmanager] Enable plugin [%s] for [%s %s]' %
+            log.msg('[PluginManager] Enable plugin [%s] for [%s %s]' %
                     (name, network, channel))
 
     def enable_global(self, plugin_name):
@@ -136,7 +137,6 @@ class PluginManager():
 
     def disable(self, network, channel, plugin_name):
         """Disable a plugin"""
-        self._create_if_not_exists(network, channel)
         if plugin_name in self.map[network][channel]:
             self.map[network][channel].remove(plugin_name)
             log.msg('[pluginmanager] Disable plugin [%s] for [%s %s]' %
@@ -150,8 +150,11 @@ class PluginManager():
 
     def filter(self, network, channel, interface=None, command=None):
         """Return a list of plugins matching the filter parameters"""
-        self._create_if_not_exists(network, channel)
-        plugin_names = self.map[network][channel].union(self.globals)
+        if channel:
+            plugin_names = self.map[network][channel].union(self.globals)
+        else:
+            plugin_names = self.globals
+
         return self.loader.filter(plugin_names, interface, command)
 
     def reload_plugin(self, name):
