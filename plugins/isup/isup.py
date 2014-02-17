@@ -25,16 +25,24 @@ class IsUp():
     commands = ['isup', 'isdown']
 
     def help(self, command):
+        """Print help"""
         return 'Test if a site is up or down  - usage: %s <url>' % command
 
     def list_commands(self):
+        """Return a list of accepted commands"""
         return self.commands
 
     def accepts_command(self, cmd):
+        """Test if command is accepted"""
         return cmd in self.commands
 
     def handle(self, proto, command, user, channel, args):
+        """Entry point for command handling"""
         user = user[0]
+
+        if len(args) == 0:
+            proto.msg(channel, '%s: Which site do you want me to check?' % user)
+            return
 
         target_url = ' '.join(args).strip()
         isupurl = parser.quote_plus(URL % target_url, ':=()/?')
@@ -44,6 +52,7 @@ class IsUp():
         d.addErrback(self.ebFailure, proto, user, channel)
 
     def ebFailure(self, failure, proto, user, channel):
+        """The ErrBack that handles failures"""
         log.err('Plugin: %s: type: %s | message: %s' %
                 (self.name, failure.type, failure.getErrorMessage()))
 
@@ -56,6 +65,7 @@ class IsUp():
                       % user)
 
     def cbSearchpage(self, page, proto, user, channel, url):
+        """Callback on successful page fetch"""
         soup = BeautifulSoup(page)
         if "It's not just you" in soup.div.text:
             proto.msg(channel, '%s: %s seems to be down' % (user, url))
@@ -63,4 +73,5 @@ class IsUp():
             proto.msg(channel, '%s: %s seems up.' % (user, url))
 
 def register():
+    """Function to be called by the plugin manager"""
     return IsUp()
