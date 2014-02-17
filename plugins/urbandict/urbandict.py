@@ -13,19 +13,19 @@ except ImportError:
     import urllib as parser
 
 from core.interface import IMsgHandler
-
+from core.tools import quote_plus
 
 def _make_apiurl(query):
     APIURL = 'http://api.urbandictionary.com/v0/define?term=%s'
-    return parser.quote_plus(APIURL % query, ':=()/?')
+    return quote_plus(APIURL % query)
 
 def _make_weburl(query):
     WEBURL = 'http://www.urbandictionary.com/define.php?term=%s'
-    return parser.quote_plus(WEBURL % query, ':=()/?')
+    return quote_plus(WEBURL % query)
 
 # Stolen from somewhere
 def _repairjson(original):
-    original = original.replace(r'\r','').replace(r'\n','')
+    original = original.replace(r'\r', '').replace(r'\n', '')
     original = original.replace('\\x', '\\u00')
     regex = re.compile(r'\\(?![/u"])')
     fixed = regex.sub(r"\\\\", original)
@@ -82,11 +82,13 @@ class Urban(object):
                          internet_error.ConnectError,
                          ValueError)
         if r == ValueError:
-            proto.msg(channel, '%s: Urban: Couldn\'t decode the JSON, sorry :(' % user)
+            proto.msg(channel, user + ': [urban] Couldn\'t decode the JSON')
         elif r == web_error.Error:
-            proto.msg(channel,  '%s: Urban: Couldn\'t fetch the page, sorry :(' % user)
+            proto.msg(channel, user + ': [urban] Couldn\'t fetch the page')
         elif r == internet_error.ConnectError:
-            proto.msg(channel, '%s: Urban: Couldn\'t connect to the server, sorry :(' % user)
+            proto.msg(channel, user + ': [urban] Couldn\'t connect to server')
+        else:
+            proto.msg(channel, user + ': [urban] Unkown error :/')
 
     def help(self, command):
         return 'Lookup a term on urban dictionary - %s <term>' % command

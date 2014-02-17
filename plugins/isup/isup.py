@@ -7,11 +7,7 @@ from twisted.internet import error as internet_error
 from bs4 import BeautifulSoup
 
 from core.interface import IMsgHandler
-
-try:
-    import urllib.parse as parser
-except ImportError:
-    import urllib as parser
+from core.tools import quote_plus
 
 URL = 'http://www.isup.me/%s'
 
@@ -45,7 +41,7 @@ class IsUp():
             return
 
         target_url = ' '.join(args).strip()
-        isupurl = parser.quote_plus(URL % target_url, ':=()/?')
+        isupurl = quote_plus(URL % target_url)
 
         d = getPage(isupurl)
         d.addCallback(self.cbSearchpage, proto, user, channel, target_url)
@@ -59,10 +55,10 @@ class IsUp():
         r = failure.check(web_error.Error, internet_error.ConnectError)
 
         if r == web_error.Error or r == internet_error.ConnectError:
-            proto.msg(channel, '%s: isup.me seems down :/' % user)
+            proto.msg(channel, user + ': [isup] isup.me seems down :/')
         else:
-            proto.msg(channel, '%s: Something failed, but i dont know what :/'
-                      % user)
+            proto.msg(channel, user + ': [isup] Something failed, but i dont ' +
+                      'know what :/')
 
     def cbSearchpage(self, page, proto, user, channel, url):
         """Callback on successful page fetch"""
