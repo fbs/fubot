@@ -3,6 +3,7 @@ from twisted.python import log
 from importlib import import_module
 import sys
 
+from core.tools import is_channel
 from core.interface import IFinalize
 
 def filter_interface(plugins, interface):
@@ -150,7 +151,7 @@ class PluginManager(object):
 
     def filter(self, network, channel, interface=None, command=None):
         """Return a list of plugins matching the filter parameters"""
-        if channel:
+        if is_channel(channel):
             plugin_names = self.map[network][channel].union(self.globals)
         else:
             plugin_names = self.globals

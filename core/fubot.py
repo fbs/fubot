@@ -77,15 +77,10 @@ class Fubot(object):
         help = ''
         user = user[0]
 
-        if channel == user:
-            _chan = None
-        else:
-            _chan = channel
-
         if args:
             command = args[0]
             plugins = self.plugins.filter(network=proto.network,
-                                          channel=_chan,
+                                          channel=channel,
                                           interface=IMsgHandler,
                                           command=command)
 
@@ -96,7 +91,7 @@ class Fubot(object):
 
         else:
             plugins = self.plugins.filter(network=proto.network,
-                                          channel=_chan,
+                                          channel=channel,
                                           interface=IMsgHandler)
             help = 'Commands: '
             for plugin in plugins:
@@ -118,7 +113,6 @@ class Fubot(object):
         cmd = ''
         args = ''
         user = _split_user(user)
-        target_is_user = False
         internalcmd = {'info': self.info,
                        'help': self.help,
                        'admin': self.admin}
@@ -127,12 +121,9 @@ class Fubot(object):
         # "  @ command arg1" -> ['@', 'arg1']
         msglst = [w for w in message.split(' ') if w]
 
-        print '%s %s :%s' % (channel, user, message)
-
         # Private messages dont have to start with the command prefix
         if channel == proto.nickname:
             # print 'channel is nick'
-            target_is_user = True
             channel = user[0]
             if msglst[0][0] == self.cmdprefix:
                 cmd = msglst[0][1:]
@@ -149,14 +140,9 @@ class Fubot(object):
         else:
             return
 
-        if target_is_user:
-            rawplugins = self.plugins.filter(network=proto.network,
-                                             channel=None,
-                                             interface=IRawMsgHandler)
-        else:
-            rawplugins = self.plugins.filter(network=proto.network,
-                                          channel=channel,
-                                          interface=IRawMsgHandler)
+        rawplugins = self.plugins.filter(network=proto.network,
+                                         channel=channel,
+                                         interface=IRawMsgHandler)
 
         for plugin in rawplugins:
             plugin.handle(proto, user, channel, message)
@@ -166,16 +152,10 @@ class Fubot(object):
             internalcmd[cmd](proto, user, channel, args)
             return
 
-        if target_is_user:
-            plugins = self.plugins.filter(network=proto.network,
-                                          channel=None,
-                                          interface=IMsgHandler,
-                                          command=cmd)
-        else:
-            plugins = self.plugins.filter(network=proto.network,
-                                          channel=channel,
-                                          interface=IMsgHandler,
-                                          command=cmd)
+        plugins = self.plugins.filter(network=proto.network,
+                                      channel=channel,
+                                      interface=IMsgHandler,
+                                      command=cmd)
         for plugin in plugins:
             # log.msg("Plugin found: %s" % plugin.name)
             plugin.handle(proto, cmd, user, channel, args)
