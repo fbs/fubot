@@ -103,7 +103,6 @@ class PluginManager(object):
         self.globals = set()
         self.loader = PluginLoader()
 
-
     def add_network(self, network):
         """Add a network to the PluginManager"""
         if network not in self.map:
